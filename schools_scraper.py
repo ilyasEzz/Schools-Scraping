@@ -42,7 +42,6 @@ def scraping():
 
         # get the name
         info['name'] = name
-        info['city'] = city
 
         # get the logo
         logo = soup.find('img', {"class": "img-container"})["src"]
@@ -54,14 +53,12 @@ def scraping():
             info['logo'] = ''
 
         # Levels
-        levels = ''
+        levels = []
         all_levels = soup.select(".entite-existe")
-        for label in all_levels:
-            if levels != '':
-                info['levels'] = "{}, {}".format(
-                    levels, label.find("span").get_text())
-            else:
-                info['levels'] = label.find("span").get_text()
+        for level in all_levels:
+            levels.append(level.contents[0].text)
+
+        info["levels"] = levels
 
         # private or public institution
         info['type'] = soup.find(
@@ -70,6 +67,12 @@ def scraping():
         # the address
         info['address'] = bloc_info.find("div", {"title": "adresse"}).find(
             class_="adresse").get_text()
+
+        # director
+        director = soup.find(class_="directeur").text
+
+        if director.lstrip() != "Cliquer pour remplir":
+            info['director'] = director
 
         # phone numbers (list)
         info['phone numbers'] = contact_scraper("telephone")
@@ -117,8 +120,10 @@ def get_urls(page):
 
 # main
 urls = set()
-for i in range(3, 8):
-    urls = get_urls("http://www.ecolia.ma/ecoles-page-{}".format(i))
+for i in range(2, 100):
+    new_urls = get_urls("http://www.ecolia.ma/ecoles-page-{}".format(i))
+    urls.update(new_urls)
+
 
 for url in urls:
     res = requests.get(url)
