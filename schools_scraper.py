@@ -107,19 +107,22 @@ def get_urls(page):
     bsoup = BeautifulSoup(response.text, "html.parser")
 
     tags = bsoup.find(id="list-ecole-content").select("h3")
-    urls = []
+    urls = set()
+
     for h3 in tags:
-        urls.append("http://www.ecolia.ma/{}".format(h3.contents[0]['href']))
+        urls.add("http://www.ecolia.ma/{}".format(h3.contents[0]['href']))
 
     return urls
 
 
-for i in range(2, 50):
+# main
+urls = set()
+for i in range(3, 8):
     urls = get_urls("http://www.ecolia.ma/ecoles-page-{}".format(i))
 
-    for url in urls:
-        res = requests.get(url)
-        soup = BeautifulSoup(res.text, "html.parser")
-        bloc_info = soup.find(class_="ecole-bloc-infos").contents[3]
+for url in urls:
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text, "html.parser")
+    bloc_info = soup.find(class_="ecole-bloc-infos").contents[3]
 
-        scraping()
+    scraping()
